@@ -158,14 +158,14 @@ string solution(vector<int> &A) {
 		}
 	}
 
-	//possible improvement if the sequence ends with odd
+	//possible improvement if the sequence ends with odd - - NOT NECESSARY
 	if (N - 1 == oddsPositions.back()) {  
 		if ((0 < answerStart) || (0 == answerStart && N - 2 < answerFinish)) {
 			answerStart = 0;
 			answerFinish = N - 2;
 		}
 	}
-	//possible improvement if the sequence starts with odd
+	//possible improvement if the sequence starts with odd  - - NOT NECESSARY
 	if (0 == oddsPositions.front()) {   
 		if ((1 < answerStart) || (1 == answerStart && N - 1 < answerFinish)) {
 			answerStart = 1;
