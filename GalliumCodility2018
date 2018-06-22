@@ -5,5 +5,5 @@ Levi Kitrossky
 was awarded
 Codility Golden Award for the Gallium 2018 Challenge
 This is the 56th Codility Golden Award granted this month.
-
+Detected time complexity: O(N*log(max(A))) or O(N*log(max(A))+log(max(A))**6)
 */
