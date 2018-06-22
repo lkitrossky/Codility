@@ -1,0 +1,46 @@
+// https://app.codility.com/cert/view/certSSQZG3-HF48FURW6MZM9ST6/
+/*
+Codility confirms that a person who identified to us on-line as:
+Levi Kitrossky
+was awarded
+Codility Golden Award for the Nickel 2018 Challenge
+This is the 40th Codility Golden Award granted this month.
+*/
+
+#include <vector>
+#include <algorithm>
+using namespace std;
+long long trapezeSize(long long base, long long rows) {
+	long long res = 0;
+	if (rows <= 0 || base <= 0)
+		return res;
+	res = (base*(base + 1)) / 2;
+	if(rows < base)
+		res -= (( base - rows)*((base - rows) + 1)) / 2;
+	return res;
+}
+
+long long solution(vector<bool> &P) {
+	long long limit = 1000000000;
+	long long falseNumber = 0;
+	long long N = P.size();
+	long long rows = N;
+	long long falseLength = 0;
+	long long overallNodes = (N*(N + 1)) / 2;
+	for (long long i = 0; i < N; i++) {
+		if (P.at(i)) {
+			if (falseLength > 0) {
+				falseNumber += trapezeSize(falseLength, rows);
+				falseLength = 0;
+			}
+		}
+		else {
+			falseLength++;
+		}
+	}
+	if (falseLength > 0) {
+		falseNumber += trapezeSize(falseLength, rows);
+	}
+
+	return min(overallNodes - falseNumber , limit);
+}
