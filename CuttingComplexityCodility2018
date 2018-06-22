@@ -1,0 +1,104 @@
+// https://app.codility.com/cert/view/certJKFSTE-N9F46BJ22EJSJ9FZ/
+/*
+
+Codility confirms that a person who identified to us on-line as:
+Levi Kitrossky
+was awarded
+Codility Golden Award for the Cutting Complexity Challenge
+This is the 33rd Codility Golden Award granted this month.
+
+*/
+// JAVA required
+
+//https://app.codility.com/cert/view/cert3C27E4-77CSUVMMMMQDPHKC/
+//Golden award
+//https://app.codility.com/programmers/custom_challenge/cutting_complexity2018/
+ 
+/* package whatever; // don't place package name! */
+ 
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+ 
+/* Name of the class has to be "Main" only if the class is public. */
+class Ideone
+{
+	public static void main (String[] args) throws java.lang.Exception
+	{
+		Solution sol = new Solution();
+		String S = "MLMMLLM";
+		int i = 3;
+		System.out.println(S);
+		System.out.println(i);
+		int s = sol.solution(S, i);
+		System.out.println(s);
+	}
+}
+ 
+// you can also use imports, for example:
+// import java.util.*;
+ 
+// you can write to stdout for debugging purposes, e.g.
+// System.out.println("this is a debug message");
+ 
+class Solution {
+    public int solution(String S, int K) {
+        // write your code in Java SE 8
+        int N = S.length();
+        int res = 0;
+        int maxMLength = 0;
+        int currentMlength = 0;
+        //if there are too long sequences they must be shortened
+        for(int i = 0; i < N;i++){
+            if(S.charAt(i) == 'L'){
+                if(currentMlength > K){
+                    res += currentMlength / (K + 1);
+                    maxMLength = Math.max(maxMLength, currentMlength);
+                }
+                currentMlength = 0;
+            }
+            else
+                currentMlength++;
+        }
+        if(currentMlength > K){
+            res += currentMlength / (K + 1);
+            maxMLength = Math.max(maxMLength, currentMlength);
+        }
+        if(maxMLength == K){
+            return 0;
+        }
+        if(maxMLength > K){
+            return res;
+        }
+        //no too long, need to prolong some
+        //Take the first K
+        int Lnumber = 0;
+        int minLnumber = N; //the worst case, turn all, no M at all
+        int currentRes = N;
+        for(int i = 0; i < K; i++){
+           if(S.charAt(i) == 'L')
+               Lnumber++;
+        }
+        currentRes = Lnumber;
+        if(K < N && 'M' == S.charAt(K))
+            currentRes++;   //after the fragment there is M that must be removed
+        minLnumber = Math.min(minLnumber, currentRes);
+        int j = K;
+        while(j < N){
+            if(S.charAt(j - K) == 'L')
+               Lnumber--;
+            if(S.charAt(j) == 'L')
+               Lnumber++; 
+            currentRes = Lnumber;
+            if(S.charAt(j - K) == 'M')
+               currentRes++;
+            if(j < N - 1 && S.charAt(j + 1) == 'M')
+               currentRes++;
+            minLnumber = Math.min(minLnumber, currentRes);
+            j++;
+        }
+        res = minLnumber;
+        return res;
+    }
+}
+ 
