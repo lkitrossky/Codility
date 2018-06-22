@@ -1,0 +1,75 @@
+//my article "Count unique sub-arrays of fixed length from an array with duplicates keeping order"
+// https://contribute.geeksforgeeks.org/?p=465720     
+// https://app.codility.com/cert/view/cert8YN2YE-XR6RF8RQZSPN9APU/
+/*
+Codility confirms that a person who identified to us on-line as:
+Levi Kitrossky
+was awarded
+Codility Golden Award for the Zinc 2018 Challenge
+This is the 41st Codility Golden Award granted this month.
+*/
+
+#include <vector>
+#include <iostream>
+using namespace std;
+const long long MODULUS = 1000000007;
+int solution(vector<int> &A) {
+	long long res = 0;
+	int N = A.size();
+	if (N < 3)
+		return 0;
+	if (3 == N)
+		return 1;
+	vector<int>positionOfFirst(N, -1);  //which number appears here got the first time? If none -1
+	vector<int>positionOfLast(N, -1);  //which number appears here got the last time? If none -1
+	vector<bool>theFirstMet(N, false);
+	vector<bool>theLastMet(N, false);
+	for (int i = 0; i < N; i++) {
+		int current = A.at(i);
+		if (false == theFirstMet.at(current-1)) {
+			theFirstMet.at(current-1) = true;
+			positionOfFirst.at(i) = current;
+		}
+	}
+	for (int i = N - 1; i >= 0; i--) {
+		int current = A.at(i);
+		if (false == theLastMet.at(current-1)) {
+			theLastMet.at(current-1) = true;
+			positionOfLast.at(i) = current;
+		}
+	}
+	vector<int> howManyFirstsAfterMe(N, 0);
+	howManyFirstsAfterMe.at(N - 1) = 0;
+	for (int i = N - 2; i >= 0; i--) {
+		howManyFirstsAfterMe.at(i) = howManyFirstsAfterMe.at(i + 1);
+		if (positionOfFirst.at(i + 1) != -1)
+			howManyFirstsAfterMe.at(i)++;
+	}
+	vector<int> howManyLastsAfterMe(N, 0);
+	howManyLastsAfterMe.at(N - 1) = 0;
+	for (int i = N - 2; i >= 0; i--) {
+		howManyLastsAfterMe.at(i) = howManyLastsAfterMe.at(i + 1);
+		if (positionOfLast.at(i + 1) != -1)
+			howManyLastsAfterMe.at(i)++;
+	}
+	vector<int>howManyUniquePairsIOpen(N, 0);
+	vector<int> howManyUniquePairsAfterIncludingMe(N, 0);   
+	howManyUniquePairsAfterIncludingMe.at(N - 1) = 0;
+
+	for (int i = N - 2; i >= 0; i--) {
+		howManyUniquePairsAfterIncludingMe.at(i) = howManyUniquePairsAfterIncludingMe.at(i + 1);
+		howManyUniquePairsAfterIncludingMe.at(i) += howManyLastsAfterMe.at(i);
+		howManyUniquePairsAfterIncludingMe.at(i) = howManyUniquePairsAfterIncludingMe.at(i) % MODULUS;
+		howManyUniquePairsAfterIncludingMe.at(i) -= howManyUniquePairsIOpen.at(A.at(i)-1);
+		howManyUniquePairsAfterIncludingMe.at(i) = howManyUniquePairsAfterIncludingMe.at(i) % MODULUS;
+		howManyUniquePairsIOpen.at(A.at(i)-1) = howManyLastsAfterMe.at(i);
+	}
+
+	for (int i = 0; i < N - 1; i++) {
+		if (positionOfFirst.at(i) != -1) {
+			res += howManyUniquePairsAfterIncludingMe.at(i+1);
+			res = res % MODULUS;
+		}
+	}
+	return (int)res;
+}
