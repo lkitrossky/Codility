@@ -1,0 +1,218 @@
+
+//	https://app.codility.com/programmers/task/break_the_rope/
+//	https://app.codility.com/programmers/challenges/sulphur2014/
+/*
+
+N is an integer within the range [0..100,000];
+each element of array A is an integer within the range [1..1,000,000];
+each element of array B is an integer within the range [1..5,000];
+each element of array C is an integer such that -1 <= C[I] < I, for each I (0 <= I < N).
+
+*/
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+//https://github.com/Stomach-ache/Codility/blob/master/sulphur-2014.cpp
+// Gold not mine:  https://app.codility.com/demo/results/training4TQN7Z-Y98/
+// Detected time complexity: O(N*log(N))
+
+
+/*
+
+Several ideas for gold
+1. The easiest way to find if the graph stands of fails is deep first search with checking weights. BUT it is good for a static graph not growing
+2. The second idea is to limit DFS by some m and find if the graph still stands, we use recursive DFS passing accummulated weights as an array and adding weights to it
+3. The main idea is to build the graph, and then use dichotometry, seek always from 0 to some low boudary lb, and depending on results increase lb (stands) or decsrease lb (fails). 
+In addition ot lb we have upper boudary ub, which keeps the last failed bgraph limit. Initially lb = 0, ub = n+1.
+4. If we decrease lb we set ub = lb first, and then lb = lb/2. If we increase lb, we set lb  = (lb+ub)/2  and leave ub as before.
+5. The end is when ub = lb +1
+
+So, we combine dichtormic cutting which has performance O(log (n)) and DFS whoich is O(N) on every step, so this is O(N*log(N))
+
+
+/*
+
+This function says if the subset of weights can be in the air, it recursive abd passes accummulated weights vector (reference)
+
+const int u						Starting node
+const int m						The border to stop the search, that is we want to know if the system is OK until m, not after it. Non-decreasing per one input
+vector	const <vector<int>> &G		The graph, it is const
+const const vector<int> &A,			This is const input
+const vector<int> &B,				This is const input
+const vector<int> &C,				This is const input
+vector<long long> &sum		partial sum of the weights on some place, always grows after more added. The only non-const in all functions!
+
+		The idea is that for every node we check if its sons fails
+
+*/
+bool dfs(const int u, const int m, const vector<vector<int>> &G, const vector<int> &A, const vector<int> &B, const vector<int> &C, vector<long long> &sum) {
+	sum[u] += B[u - 1];
+	for (unsigned int i = 0; i < G[u].size() && G[u][i] <= m; ++i) {
+		if (!dfs(G[u][i], m, G, A, B, C, sum)) return false;  //recursive call for later weights, also limited by m
+		sum[u] += sum[G[u][i]];
+	}
+	return sum[u] <= A[u - 1];  //if sons not fail check myself, total weight on u, compare to the rope of u-1
+}
+/*							This function says if the subset of weights can be in the air
+		it does not care when it fails, only if fails or not. So, we can try later nodes first
+
+	const int m						The border to stop the search, that is we want to know if the system is OK until m, not after it,
+										called several times per solution, always grows
+	const vector<vector<int>> &G		The graph, it is const 
+	const vector<int> &A,				This and following are const input
+	const vector<int> &B,
+	const vector<int> &C
+
+*/
+bool can(const int m, const vector<vector<int>> &G, const vector<int> &A, const vector<int> &B, const vector<int> &C) {
+	vector<long long> sum(G.size() + 1, 0);    //strange thing, can save here from the previous call
+	for (unsigned int i = 0; i < G[0].size() && G[0][i] <= m; ++i) { //we essentially check, if one of sub nodes fail
+		if (!dfs(G[0][i], m, G, A, B, C, sum)) return false;
+	}
+	return true;
+}
+/*
+Main ideas
+1. Create a graph. Just suppose the size as the amount of weights + 1 and add only edges. All graph is just a vector of vector of edges
+2. Use dichotomy, cut set of object into tw0, begin := 0, end := size mid := (begin+end)/2.  intervals (0,mid) and (mid, end), check the left, if it is OK, go to (mid, end), if not deal with (begin, mid)
+Important, all the time we check from 0 to the inferior of the answer, the inferior always grows
+3. On every interval call function can(int m, vector<vector<int>> &G, vector<int> &A, vector<int> &B, vector<int> &C)
+These calls are independent.
+4. lb is non decreasing, ub is no increasing
+5. When ub - lb < 2, lb is the answer
+*/
+int solution(const vector<int> &A,const  vector<int> &B, const  vector<int> &C) {
+	int n = A.size();
+	vector<vector<int>> G(n + 1);
+	for (int i = 0; i < n; ++i) {
+		G[C[i] + 1].push_back(i + 1);
+	}
+	int lb = 0, ub = n + 1;
+	while (ub - lb > 1) {
+		int mid = (lb + ub) / 2;
+		if (can(mid, G, A, B, C)) {
+			lb = mid;
+		}
+		else {
+			ub = mid;
+		}
+	}
+	return lb;
+}
+/*
+Naive approach
+
+The main idea
+1. It is clearly directed acyclic graph DAG, the solution must be ib graph theory
+2. There are many algo to traverse the graph, but in our case we have an additional data
+3. There is a sequence of events and we seek the first
+4. So, it is natural to traverse in an informed way, similar to the best first
+https://www.geeksforgeeks.org/best-first-search-informed-search/
+5. But we need not go to the best v\but to the earliest!
+
+We deal with some node, we take all later neighbors and go the the earliest
+We keep al the time the earlist break and skip on all later
+
+*/
+
+//Silver fails on performance
+/*
+
+https://app.codility.com/demo/results/training79E8PJ-MH6/
+
+Task Score
+90%
+Correctness
+100%
+Performance
+80%
+Detected time complexity:
+O(N**2)
+
+*/
+int solutionSilver(vector<int> &A, vector<int> &B, vector<int> &C) {
+	for (size_t i = 0; i < B.size(); i++) {
+		A.at(i) -= B.at(i);
+		if (A.at(i) < 0)
+			return i;
+		int pred = C.at(i);
+		while (pred >= 0) {
+			A.at(pred) -= B.at(i);
+			if (A.at(pred) < 0)
+				return i;
+			pred = C.at(pred);
+		}
+	}
+	return B.size();
+}
+
+int main() {
+	int A[] = { 5, 3, 6, 3, 3 };
+	int B[] = { 2, 3, 1, 1, 2 };
+	int C[] = { -1, 0, -1, 0, 3 };
+	vector<int> vA(A, A + 5);
+	vector<int> vB(B, B + 5);
+	vector<int> vC(C, C + 5);
+	int expected = 3;
+	int calcGold = solution(vA, vB, vC);
+	int calcSilver = solutionSilver(vA, vB, vC);
+	cout << "First expected: " << expected << " calced: " << calcGold << ", " << calcSilver  << endl;
+	int A2[] = { 4, 3, 1 };
+	int B2[] = { 2, 1, 2 };
+	int C2[] = { -1, 0, 1 };
+	vA = vector<int>(A2, A2 + sizeof(A2) / sizeof(int));
+	vB = vector<int>(B2, B2 + sizeof(B2) / sizeof(int));
+	vC = vector<int>(C2, C2 + sizeof(C2) / sizeof(int));
+	expected = 2;
+	cout << "First expected: " << expected << " calced: " << calcGold << ", " << calcSilver  << endl;
+
+	int A3[] = { 4, 3 };
+	int B3[] = { 1, 3 };
+	int C3[] = { -1, 0 };
+	vA = vector<int>(A3, A3 + sizeof(A3) / sizeof(int));
+	vB = vector<int>(B3, B3 + sizeof(B3) / sizeof(int));
+	vC = vector<int>(C3, C3 + sizeof(C3) / sizeof(int));
+	expected = 2;
+	calcGold = solution(vA, vB, vC);
+	calcSilver = solutionSilver(vA, vB, vC);
+	cout << "First expected: " << expected << " calced: " << calcGold << ", " << calcSilver  << endl;
+
+	int N = 10;
+	vector<int> Ar(N, 0), Br(N, 0), Cr(N, 0);
+
+	for (int i = 0; i < N; i++) {
+		Ar.at(i) = rand() % 10 + 3;
+		Br.at(i) = rand() % 5 + 1;
+		Cr.at(i) = rand() % (i + 1) - 1;
+		Cr.at(i) = -1;
+		cout << "#" << i << " " << Ar.at(i) << " " << Br.at(i) << " " << Cr.at(i) << endl;
+	}
+	cout << endl;
+	calcGold = solution(vA, vB, vC);
+	calcSilver = solutionSilver(vA, vB, vC);
+	cout << " calced: " << calcGold << ", " << calcSilver << endl;
+
+	return 0;
+}
+/*
+First expected: 3 calced: 0, 3
+First expected: 2 calced: 0, 2
+First expected: 2 calced: 0, 2
+#0 4 3 -1
+#1 3 5 -1
+#2 11 4 -1
+#3 7 1 -1
+#4 4 3 -1
+#5 4 1 -1
+#6 10 2 -1
+#7 7 3 -1
+#8 5 3 -1
+#9 9 4 -1
+
+calced: 0 , 1
+
+
+*/
