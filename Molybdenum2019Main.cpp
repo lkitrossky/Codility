@@ -13,7 +13,9 @@ using namespace std;
 vector<int> solution(int K, int M, vector<int> &A) {
 	int N = A.size();
 	int leader = N / 2 + 1;
-	map<int, int> current;
+	map<int, int> current; 
+	// Damian Werpachowski noted that this may result in O(M*log (M)) and not O(M). 
+	//If map is replaced by vector it will be O(N+M), but for sparce array and small numbers it maybe even worse
 	vector<int> res;
 	set<int> resSet;
 //initialization
