@@ -1,5 +1,6 @@
 // Gold from the first attempt ( almost, some compiler issues, but not the solution per se)
 //this one was easy, but I was busy with something else
+//https://app.codility.com/programmers/challenges/palladium2020/
 //https://app.codility.com/cert/view/cert4R3JKZ-2GBANK62V8G8Q9RT/
 //https://app.codility.com/cert/view/cert4R3JKZ-2GBANK62V8G8Q9RT/details/
 /*
