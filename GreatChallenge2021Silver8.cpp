@@ -1,4 +1,11 @@
 /*
+	General conclusions: 
+		better not to be stuck in one approach but try several
+		Survey algorithms to find the appropriate
+							
+
+*/
+/*
 https://app.codility.com/programmers/challenges/great_code_off2021/ 
 The solution was published here: https://www.youtube.com/watch?v=XzUuEkLygbs&t=4s by Codility itself
 Segment tree - https://www.youtube.com/watch?v=XzUuEkLygbs&t=474s
